@@ -85,6 +85,6 @@ int main(int argc, char* argv[]) {
         }
         res += id;
     }
-    std::cout << res << std::endl;
+    std::cout << res << std::endl;  // 2505
     return 0;
 }

@@ -79,5 +79,5 @@ int main(int argc, char* argv[]) {
     while(std::getline(file, line)) {
         res += min_game(split(line, ": ")[1]);
     }
-    std::cout << res << std::endl;
+    std::cout << res << std::endl;  // 70265
 }
