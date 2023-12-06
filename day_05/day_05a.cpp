@@ -39,9 +39,8 @@ int main(int argc, char *argv[]) {
     nums = std::vector<long>(next.size(), 0);
     while(getline(file, line)) {
         if (line == "") {
-            for (int i = 0; i < nums.size(); i++) {
-                nums[i] = next[i];
-            }
+            nums = next;
+            next.clear();
             getline(file, line);
             continue;
         }
@@ -53,7 +52,7 @@ int main(int argc, char *argv[]) {
 
         for (int i = 0; i < nums.size(); i++) {
             if (nums[i] >= source && nums[i] < source + range) {
-                next[i] = (nums[i] - source) + target;
+                next.push_back((nums[i] - source) + target);
             }
         }
     }
