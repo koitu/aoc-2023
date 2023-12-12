@@ -4,6 +4,22 @@
 #include <fstream>
 #include <iostream>
 
+typedef long long ll;
+
+ll gcd(ll a, ll b) {
+    while (b != 0) {
+//        a, b = b, a % b;
+        ll c = a % b;
+        a = b;
+        b = c;
+    }
+    return a;
+}
+
+ll lcm(ll a, ll b) {
+    return a * b / gcd(a, b);
+}
+
 class Node {
 public:
     std::string name, left, right;
@@ -40,13 +56,52 @@ int main(int argc, char* argv[]) {
         n->R = n_map[n->right];
     }
 
-    // TODO: optimization
-    //  - use the fact the path is repeating
-    //  - if you are in the same index of path and same location then you have repeated
-    //  - 6 A's and 6 Z's (6! = 720 ways)
-    //  - brute force convert NFA to DFA
+    std::vector<Node*> find;
+    for (auto &n: nodes) {
+        if (n->name[2] == 'A') {
+            find.push_back(n);
+        }
+    }
 
-    // after path.length() * nodes.size() + 1 you must have repeated the (path, node) state at least once
+    std::vector<int> found;
+    for (auto &f: find) {
+        Node* cur = f;
+        int res = 0;
+        bool done = false;
+
+        while(!done) {
+            for (auto &c: path) {
+                res++;
+                switch(c) {
+                    case 'L':
+                        cur = cur->L;
+                        break;
+                    case 'R':
+                        cur = cur->R;
+                        break;
+                    default:
+                        std::cout << "error!" << std::endl;
+                }
+
+                if (cur->name[2] == 'Z') {
+                    std::cout << res << std::endl;  // 21409
+                    found.push_back(res);
+                    done = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    ll res = 1;
+    for (int &f: found) {
+        res = lcm(res, static_cast<ll>(f));
+    }
+
+    // really dislike this, not explained in the question but
+    //  - for each starting node they will only visit one ending node
+    //  - after visiting that ending node they will go back to the starting node on the next step
+    std::cout << res << std::endl;  // 21165830176709
 
 //    std::vector<Node*> cur;
 //    std::vector<Node*> next;
