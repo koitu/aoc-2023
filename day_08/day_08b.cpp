@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 if (cur->name[2] == 'Z') {
-                    std::cout << res << std::endl;  // 21409
+                    std::cout << res << std::endl;
                     found.push_back(res);
                     done = true;
                     break;
