@@ -20,6 +20,7 @@ enum block {
 };
 
 std::map<char, int> d_map{
+    {'S', NORTH | EAST | SOUTH | WEST},
     {'|', NORTH | SOUTH},
     {'-', EAST | WEST},
     {'L', NORTH | EAST},
@@ -47,7 +48,7 @@ direction invert(direction d) {
 
 
 int main(int argc, char *argv[]) {
-    std::string input = "./sample_d.txt";
+    std::string input = "./input.txt";
 
     std::fstream file(input);
     std::string line;
@@ -63,12 +64,11 @@ int main(int argc, char *argv[]) {
     } while (getline(file, line));
     maze.push_back(pad);
 
+    // scale the pipes maze three times so that outer can flow between pipes
     std::vector<std::vector<block>> pipes;
-    for (auto &i: maze) {
-        pipes.push_back(std::vector<block>(pad.size() + 2, NOTHING));
+    for (int i = 0; i < maze.size()*3; i++) {
+        pipes.push_back(std::vector<block>(pad.size()*3, NOTHING));
     }
-    pipes.push_back(std::vector<block>(pad.size() + 2, NOTHING));
-    pipes.push_back(std::vector<block>(pad.size() + 2, NOTHING));
 
     int i, j;
     for (i = 0; i < maze.size(); i++) {
@@ -99,12 +99,19 @@ int main(int argc, char *argv[]) {
     }
 
     while(true) {
-        pipes[i+1][j+1] = WALL;
+        int cur_direction = d_map[maze[i][j]];
+
+        pipes[i*3 + 1][j*3 + 1] = WALL;
+        if (cur_direction & NORTH) pipes[i*3][j*3 + 1] = WALL;
+        if (cur_direction & EAST) pipes[i*3 + 1][j*3 + 2] = WALL;
+        if (cur_direction & SOUTH) pipes[i*3 + 2][j*3 + 1] = WALL;
+        if (cur_direction & WEST) pipes[i*3 + 1][j*3] = WALL;
+
         if (maze[i][j] == 'S') {
             break;
         }
 
-        direction cur = (direction)(d_map[maze[i][j]] - (int)invert(prev_direction));
+        direction cur = (direction)(cur_direction - (int)invert(prev_direction));
         switch(cur) {
             case NORTH:
                 i--;
@@ -126,21 +133,21 @@ int main(int argc, char *argv[]) {
     }
 
     std::queue<std::pair<int, int>> next;
-    for (int x = 0; x < pad.size() + 2; x++) {
+    for (int x = 0; x < pad.size()*3; x++) {
         pipes[0][x] = OUTER;
-        pipes[maze.size()+1][x] = OUTER;
+        pipes[maze.size()*3 - 1][x] = OUTER;
     }
-    for (int x = 1; x < pad.size() + 1; x++) {
-        next.push(std::pair(1, x));
-        next.push(std::pair(maze.size(), x));
-    }
-    for (int x = 0; x < maze.size() + 2; x++) {
+    for (int x = 0; x < maze.size()*3; x++) {
         pipes[x][0] = OUTER;
-        pipes[x][pad.size()+1] = OUTER;
+        pipes[x][pad.size()*3 - 1] = OUTER;
     }
-    for (int x = 1; x < maze.size() + 1; x++) {
+    for (int x = 1; x < pad.size()*3 - 1; x++) {
+        next.push(std::pair(1, x));
+        next.push(std::pair(maze.size()*3 - 2, x));
+    }
+    for (int x = 1; x < maze.size()*3 - 1; x++) {
         next.push(std::pair(x, 1));
-        next.push(std::pair(x, pad.size()));
+        next.push(std::pair(x, pad.size()*3 - 2));
     }
 
     std::pair<int, int> cur;
@@ -160,20 +167,20 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    for (auto &p: pipes) {
-        for (auto &b: p) {
-            std::cout << b;
-        }
-        std::cout << std::endl;
-    }
+//    for (auto &p: pipes) {
+//        for (auto &b: p) {
+//            std::cout << b;
+//        }
+//        std::cout << std::endl;
+//    }
 
     int count = 0;
-    for (auto &p: pipes) {
-        for (auto &b: p) {
-            if (b == NOTHING) {
+    for (int i = 0; i < maze.size(); i++) {
+        for (int j = 0; j < pad.size(); j++) {
+            if (pipes[i*3 + 1][j*3 + 1] == NOTHING) {
                 count++;
             }
         }
     }
-    std::cout << count << std::endl;
+    std::cout << count << std::endl;  // 353
 }
